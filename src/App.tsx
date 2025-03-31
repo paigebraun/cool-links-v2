@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "./components/ui/button";
+import AddLinkDialog from "./components/addLinkDialog";
 
 function App() {
     return (
@@ -53,11 +54,7 @@ function App() {
                 </header>
                 <AppLinks />
             </SidebarInset>
-            <Button
-                variant="secondary"
-                className="absolute bottom-6 right-6 size-12 rounded-xl z-99">
-                <Plus className="size-8" />
-            </Button>
+            <AddLinkDialog />
         </SidebarProvider>
     );
 }

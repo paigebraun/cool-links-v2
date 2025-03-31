@@ -1,6 +1,10 @@
 import Masonry from "react-masonry-css";
+import LinkCard from "./LinkCard";
+import useLinkCollectionStore from "../stores/useLinkCollectionStore";
 
 function AppLinks() {
+    const links = useLinkCollectionStore((state) => state.links);
+
     const breakpointColumnsObj = {
         default: 4,
         1500: 3,
@@ -13,10 +17,14 @@ function AppLinks() {
             breakpointCols={breakpointColumnsObj}
             className="my-masonry-grid px-4"
             columnClassName="my-masonry-grid_column">
-            <div className="h-24 rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
+            {links.map((link) => (
+                <LinkCard
+                    key={link.id}
+                    title={link.title}
+                    description={link.url}
+                    image={link.image}
+                />
+            ))}
         </Masonry>
     );
 }
