@@ -2,8 +2,12 @@ import Masonry from "react-masonry-css";
 import LinkCard from "./LinkCard";
 import useLinkCollectionStore from "../stores/useLinkCollectionStore";
 
-function AppLinks() {
+function AppLinks({ activeCollectionId }: { activeCollectionId: string }) {
     const links = useLinkCollectionStore((state) => state.links);
+
+    const filteredLinks = links.filter(
+        (link) => link.collectionId === activeCollectionId
+    );
 
     const breakpointColumnsObj = {
         default: 4,
@@ -17,7 +21,7 @@ function AppLinks() {
             breakpointCols={breakpointColumnsObj}
             className="my-masonry-grid px-4"
             columnClassName="my-masonry-grid_column">
-            {links.map((link) => (
+            {filteredLinks.map((link) => (
                 <LinkCard
                     key={link.id}
                     title={link.title}

@@ -134,6 +134,6 @@
 }
 
 /* Style your items */
-.my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+.my-masonry-grid_column > a > div { /* change div to reference your elements you put in <Masonry> */
   margin-bottom: 20px;
 }

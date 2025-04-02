@@ -20,7 +20,7 @@ function LinkCard({ title, description, image }: LinkCardProps) {
                     <img
                         src={image}
                         alt=""
-                        className="rounded-md hover:scale-105 transition-transform duration-200 ease-in-out"
+                        className="rounded-md hover:scale-105 transition-transform duration-200 ease-in-out w-full"
                     />
                 </CardContent>
                 <CardHeader className="p-1">
