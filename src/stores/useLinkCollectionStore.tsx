@@ -2,8 +2,38 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { v4 as uuidv4 } from "uuid";
 
+interface Link {
+    id: string;
+    title: string;
+    url: string;
+    image: string;
+    collectionId: string;
+}
+
+interface Collection {
+    id: string;
+    name: string;
+    links: Link[];
+}
+
+interface LinkCollectionStore {
+    collections: Collection[];
+    links: Link[];
+    addLink: (
+        title: string,
+        url: string,
+        image: string,
+        collection?: string
+    ) => void;
+    deleteLink: (linkId: string) => void;
+    moveLinkToCollection: (linkId: string, newCollectionId: string) => void;
+    createCollection: (name: string) => void;
+    deleteCollection: (collectionId: string) => void;
+    renameCollection: (collectionId: string, newName: string) => void;
+}
+
 // Zustand store for links and collections
-const useLinkCollectionStore = create(
+const useLinkCollectionStore = create<LinkCollectionStore>()(
     persist(
         (set) => ({
             collections: [{ id: "recent", name: "Recent", links: [] }],

@@ -24,9 +24,11 @@ function AppLinks({ activeCollectionId }: { activeCollectionId: string }) {
             {filteredLinks.map((link) => (
                 <LinkCard
                     key={link.id}
+                    linkId={link.id}
                     title={link.title}
                     description={link.url}
                     image={link.image}
+                    activeCollectionId={activeCollectionId}
                 />
             ))}
         </Masonry>
