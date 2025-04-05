@@ -17,6 +17,13 @@ import { Button } from "./ui/button";
 import AddItemDialog from "./addItemDialog";
 import useLinkCollectionStore from "@/stores/useLinkCollectionStore";
 import capitalizeFirstLetter from "@/utils/string-utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Ellipsis, Trash2 } from "lucide-react";
 
 export function AppSidebar({
     setActiveCollection,
@@ -32,7 +39,17 @@ export function AppSidebar({
         const createCollection =
             useLinkCollectionStore.getState().createCollection;
         createCollection(collectionName);
-        console.log("New collection added:", collectionName);
+    };
+
+    const handleDeleteCollection = (
+        e: React.MouseEvent,
+        collectionId: string
+    ) => {
+        e.stopPropagation();
+        const deleteCollection =
+            useLinkCollectionStore.getState().deleteCollection;
+        deleteCollection(collectionId);
+        setActiveCollection("recent");
     };
 
     return (
@@ -55,12 +72,37 @@ export function AppSidebar({
                                         onClick={() =>
                                             setActiveCollection(collection.id)
                                         }>
-                                        <button className="w-full text-left">
+                                        <button className="w-full text-left peer">
                                             {capitalizeFirstLetter(
                                                 collection.name
                                             )}
                                         </button>
                                     </SidebarMenuButton>
+                                    {collection.id !== "recent" && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger
+                                                className="absolute right-2 top-1 opacity-0 hover:opacity-100 peer-hover:opacity-100 [&[data-state=open]]:opacity-100 transition-opacity duration-200 ease-in-out"
+                                                aria-label="Collection options">
+                                                <Ellipsis />
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem className="p-0">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-between hover:text-destructive font-normal text-sm !px-2"
+                                                        onClick={(e) =>
+                                                            handleDeleteCollection(
+                                                                e,
+                                                                collection.id
+                                                            )
+                                                        }>
+                                                        Delete{" "}
+                                                        <Trash2 className="hover:text-destructive" />
+                                                    </Button>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>
