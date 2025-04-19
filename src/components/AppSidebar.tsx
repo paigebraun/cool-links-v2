@@ -14,7 +14,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { Button } from "./ui/button";
-import AddItemDialog from "./addItemDialog";
+import AddItemDialog from "./AddItemDialog";
 import useLinkCollectionStore from "@/stores/useLinkCollectionStore";
 import capitalizeFirstLetter from "@/utils/string-utils";
 import {

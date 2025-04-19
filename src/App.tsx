@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
-import AppLinks from "@/components/app-links";
+import { AppSidebar } from "@/components/AppSidebar";
+import AppLinks from "@/components/AppLinks";
 import { Separator } from "@/components/ui/separator";
 import {
     SidebarInset,
@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import { Button } from "./components/ui/button";
 import useLinkCollectionStore from "@/stores/useLinkCollectionStore";
-import AddItemDialog from "./components/addItemDialog";
+import AddItemDialog from "./components/AddItemDialog";
 import capitalizeFirstLetter from "./utils/string-utils";
 
 function App() {
@@ -35,7 +35,7 @@ function App() {
     }
 
     // Use Link Preview API to get link info
-    async function handleAddLink(linkValue: string) {
+    async function handleAddLink(linkValue: string, collectionId: string) {
         let clickLink = getClickableLink(linkValue);
         if (clickLink) {
             const data = {
@@ -68,7 +68,7 @@ function App() {
                     response.title,
                     clickLink,
                     linkImage,
-                    activeCollectionId
+                    collectionId || activeCollectionId
                 );
             } catch (error) {
                 console.error("Error fetching link preview:", error);
@@ -130,6 +130,8 @@ function App() {
                 onSave={handleAddLink}
                 dialogTitle="Add New Link"
                 dialogDescription="Enter the URL of the link you want to add."
+                isAddingLink={true}
+                activeCollectionId={activeCollectionId}
             />
         </SidebarProvider>
     );

@@ -5,9 +5,10 @@ import useLinkCollectionStore from "../stores/useLinkCollectionStore";
 function AppLinks({ activeCollectionId }: { activeCollectionId: string }) {
     const links = useLinkCollectionStore((state) => state.links);
 
-    const filteredLinks = links.filter(
-        (link) => link.collectionId === activeCollectionId
-    );
+    const filteredLinks =
+        activeCollectionId === "recent"
+            ? links
+            : links.filter((link) => link.collectionId === activeCollectionId);
 
     const breakpointColumnsObj = {
         default: 4,
