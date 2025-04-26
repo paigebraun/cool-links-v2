@@ -87,7 +87,7 @@ function AddItemDialog({
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger className={triggerClassName} asChild>
                 {trigger || (
-                    <Button variant="ghost" className={triggerClassName}>
+                    <Button variant="outline" className={triggerClassName}>
                         {triggerIcon}
                     </Button>
                 )}

@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search } from "lucide-react";
+import { Search as SearchIcon } from "lucide-react";
+import Search from "@/components/Search";
 import { Button } from "./components/ui/button";
 import useLinkCollectionStore from "@/stores/useLinkCollectionStore";
 import AddItemDialog from "./components/AddItemDialog";
@@ -17,6 +18,8 @@ import capitalizeFirstLetter from "./utils/string-utils";
 
 function App() {
     const [activeCollectionId, setActiveCollectionId] = useState("recent");
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [viewMode, setViewMode] = useState("grid");
 
     const collections = useLinkCollectionStore((state) => state.collections);
 
@@ -80,6 +83,7 @@ function App() {
 
     return (
         <SidebarProvider>
+            <Search open={searchOpen} setOpen={setSearchOpen} />
             <AppSidebar
                 activeCollectionId={activeCollectionId}
                 setActiveCollection={setActiveCollectionId}
@@ -104,9 +108,10 @@ function App() {
                             data-slot="sidebar-trigger"
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7">
-                            <Search />
-                            <span className="sr-only">Toggle Sidebar</span>
+                            className="h-7 w-7"
+                            onClick={() => setSearchOpen(true)}>
+                            <SearchIcon />
+                            <span className="sr-only">Toggle Search</span>
                         </Button>
                         <div className="h-4">
                             <Separator
@@ -114,7 +119,7 @@ function App() {
                                 className="mr-2 h-4"
                             />
                         </div>
-                        <Tabs defaultValue="grid">
+                        <Tabs defaultValue="grid" onValueChange={setViewMode}>
                             <TabsList>
                                 <TabsTrigger value="grid">Grid</TabsTrigger>
                                 <TabsTrigger value="list">List</TabsTrigger>
@@ -122,7 +127,10 @@ function App() {
                         </Tabs>
                     </div>
                 </header>
-                <AppLinks activeCollectionId={activeCollectionId} />
+                <AppLinks
+                    viewMode={viewMode}
+                    activeCollectionId={activeCollectionId}
+                />
             </SidebarInset>
             <AddItemDialog
                 triggerClassName="fixed bottom-4 right-4"

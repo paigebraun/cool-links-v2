@@ -2,7 +2,13 @@ import Masonry from "react-masonry-css";
 import LinkCard from "./LinkCard";
 import useLinkCollectionStore from "../stores/useLinkCollectionStore";
 
-function AppLinks({ activeCollectionId }: { activeCollectionId: string }) {
+function AppLinks({
+    activeCollectionId,
+    viewMode,
+}: {
+    activeCollectionId: string;
+    viewMode: string;
+}) {
     const links = useLinkCollectionStore((state) => state.links);
 
     const filteredLinks =
@@ -18,21 +24,38 @@ function AppLinks({ activeCollectionId }: { activeCollectionId: string }) {
     };
 
     return (
-        <Masonry
-            breakpointCols={breakpointColumnsObj}
-            className="my-masonry-grid px-4"
-            columnClassName="my-masonry-grid_column">
-            {filteredLinks.map((link) => (
-                <LinkCard
-                    key={link.id}
-                    linkId={link.id}
-                    title={link.title}
-                    description={link.url}
-                    image={link.image}
-                    activeCollectionId={activeCollectionId}
-                />
-            ))}
-        </Masonry>
+        (viewMode === "grid" && (
+            <Masonry
+                breakpointCols={breakpointColumnsObj}
+                className="my-masonry-grid px-4"
+                columnClassName="my-masonry-grid_column">
+                {filteredLinks.map((link) => (
+                    <LinkCard
+                        key={link.id}
+                        linkId={link.id}
+                        title={link.title}
+                        description={link.url}
+                        image={link.image}
+                        activeCollectionId={activeCollectionId}
+                    />
+                ))}
+            </Masonry>
+        )) ||
+        (viewMode === "list" && (
+            <div className="flex flex-col gap-2 px-4 mx-auto my-[20px]">
+                {filteredLinks.map((link) => (
+                    <LinkCard
+                        viewMode={viewMode}
+                        key={link.id}
+                        linkId={link.id}
+                        title={link.title}
+                        description={link.url}
+                        image={link.image}
+                        activeCollectionId={activeCollectionId}
+                    />
+                ))}
+            </div>
+        ))
     );
 }
 

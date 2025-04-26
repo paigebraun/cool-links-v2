@@ -21,6 +21,7 @@ import { Button } from "./ui/button";
 import { Separator } from "@/components/ui/separator";
 
 interface LinkCardProps {
+    viewMode?: string;
     title: string;
     description: string;
     image: string;
@@ -29,6 +30,7 @@ interface LinkCardProps {
 }
 
 function LinkCard({
+    viewMode = "grid",
     title,
     description,
     image,
@@ -59,60 +61,76 @@ function LinkCard({
     };
 
     return (
-        <a href={description} target="_blank" rel="noopener noreferrer">
-            <Card className="bg-zinc-50 border-none p-2 gap-4 relative group">
-                <CardContent className="p-1">
+        (viewMode === "list" && (
+            <a href={description} target="_blank" rel="noopener noreferrer">
+                <div className="flex rounded-sm p-2 hover:bg-zinc-50 items-center">
                     <img
                         src={image}
                         alt=""
-                        className="rounded-md hover:scale-105 transition-transform duration-200 ease-in-out w-full"
+                        className="rounded-md h-[69px] w-[88px] object-cover"
                     />
-                </CardContent>
-                {activeCollectionId !== "recent" && (
-                    <div className="absolute top-5 right-5 z-10">
-                        <Select
-                            value={activeCollectionName}
-                            onValueChange={handleCollectionChange}>
-                            <SelectTrigger className="w-fit relative opacity-0 group-hover:opacity-100 [&[data-state=open]]:opacity-100 transition-opacity duration-200 ease-in-out">
-                                <SelectValue placeholder="Select a collection" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Collection</SelectLabel>
-                                    {collections
-                                        .filter(
-                                            (collection) =>
-                                                collection.id !== "recent"
-                                        )
-                                        .map((collection) => (
-                                            <SelectItem
-                                                value={collection.name}
-                                                key={collection.id}>
-                                                {capitalizeFirstLetter(
-                                                    collection.name
-                                                )}
-                                            </SelectItem>
-                                        ))}
-                                </SelectGroup>
-                                <SelectGroup>
-                                    <Separator className="my-2" />
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-between hover:text-destructive font-normal text-sm !px-2"
-                                        onClick={handleDeleteLink}>
-                                        Delete <Trash2 />
-                                    </Button>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                    <div className="flex flex-col justify-center p-2">
+                        <h3 className="text-lg font-semibold">{title}</h3>
+                        <p className="text-sm text-gray-500">{description}</p>
                     </div>
-                )}
-                <CardHeader className="p-1 overflow-hidden [mask-image:linear-gradient(to_right,rgba(0,0,0,1)_90%,rgba(0,0,0,0))] [-webkit-mask-image:linear-gradient(to_right,rgba(0,0,0,1)_90%,rgba(0,0,0,0))]">
-                    <CardTitle>{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
-                </CardHeader>
-            </Card>
-        </a>
+                </div>
+            </a>
+        )) || (
+            <a href={description} target="_blank" rel="noopener noreferrer">
+                <Card className="bg-zinc-50 border-none p-2 gap-4 relative group">
+                    <CardContent className="p-1">
+                        <img
+                            src={image}
+                            alt=""
+                            className="rounded-md hover:scale-105 transition-transform duration-200 ease-in-out w-full"
+                        />
+                    </CardContent>
+                    {activeCollectionId !== "recent" && (
+                        <div className="absolute top-5 right-5 z-10">
+                            <Select
+                                value={activeCollectionName}
+                                onValueChange={handleCollectionChange}>
+                                <SelectTrigger className="w-fit relative opacity-0 group-hover:opacity-100 [&[data-state=open]]:opacity-100 transition-opacity duration-200 ease-in-out">
+                                    <SelectValue placeholder="Select a collection" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Collection</SelectLabel>
+                                        {collections
+                                            .filter(
+                                                (collection) =>
+                                                    collection.id !== "recent"
+                                            )
+                                            .map((collection) => (
+                                                <SelectItem
+                                                    value={collection.name}
+                                                    key={collection.id}>
+                                                    {capitalizeFirstLetter(
+                                                        collection.name
+                                                    )}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectGroup>
+                                    <SelectGroup>
+                                        <Separator className="my-2" />
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-between hover:text-destructive font-normal text-sm !px-2"
+                                            onClick={handleDeleteLink}>
+                                            Delete <Trash2 />
+                                        </Button>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    <CardHeader className="p-1 overflow-hidden [mask-image:linear-gradient(to_right,rgba(0,0,0,1)_90%,rgba(0,0,0,0))] [-webkit-mask-image:linear-gradient(to_right,rgba(0,0,0,1)_90%,rgba(0,0,0,0))]">
+                        <CardTitle>{title}</CardTitle>
+                        <CardDescription>{description}</CardDescription>
+                    </CardHeader>
+                </Card>
+            </a>
+        )
     );
 }
 
