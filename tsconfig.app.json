@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "ES2015",
+    "outDir": "./dist",
     "jsx": "react-jsx",
     "esModuleInterop": true,
     // ...
