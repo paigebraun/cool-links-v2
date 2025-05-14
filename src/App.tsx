@@ -40,44 +40,51 @@ function App() {
     // Use Link Preview API to get link info
     async function handleAddLink(linkValue: string, collectionId: string) {
         let clickLink = getClickableLink(linkValue);
-        if (clickLink) {
-            const data = {
-                key: "920fb1aae8a530a3bbe743459af730a7",
-                q: clickLink,
-            };
+        const data = {
+            key: "920fb1aae8a530a3bbe743459af730a7",
+            q: clickLink,
+        };
 
-            try {
-                const res = await fetch("https://api.linkpreview.net", {
-                    method: "POST",
-                    mode: "cors",
-                    body: JSON.stringify(data),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
+        try {
+            const res = await fetch("https://api.linkpreview.net", {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-                const response = await res.json();
-
-                // Use screenshot if there is no image returned by linkPreview API
-                let linkImage;
-                if (!response.image) {
-                    linkImage = `https://api.screenshotmachine.com/?key=1b820e&url=${clickLink}&dimension=1024x768&delay=200`;
-                } else {
-                    linkImage = response.image;
-                }
-
-                // Add the link to the Zustand store
-                addLink(
-                    response.title,
-                    clickLink,
-                    linkImage,
-                    collectionId || activeCollectionId
-                );
-            } catch (error) {
-                console.error("Error fetching link preview:", error);
+            if (!res.ok) {
+                throw new Error("Failed to fetch link preview");
             }
-        } else {
-            console.log(linkValue, "is an invalid link");
+
+            const response = await res.json();
+
+            if (!response.title || !response.url) {
+                throw new Error("Invalid URL: Could not fetch link details");
+            }
+
+            // Use screenshot if there is no image returned by linkPreview API
+            let linkImage;
+            if (!response.image) {
+                linkImage = `https://api.screenshotmachine.com/?key=1b820e&url=${clickLink}&dimension=1024x768&delay=200`;
+            } else {
+                linkImage = response.image;
+            }
+
+            // Add the link to the Zustand store
+            addLink(
+                response.title,
+                clickLink,
+                linkImage,
+                collectionId || activeCollectionId
+            );
+
+            return true;
+        } catch (error) {
+            console.error("Error fetching link preview:", error);
+            throw error;
         }
     }
 

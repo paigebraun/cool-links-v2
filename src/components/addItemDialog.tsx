@@ -46,7 +46,9 @@ function AddItemDialog({
     activeCollectionId = "",
 }: AddItemDialogProps) {
     const collections = useLinkCollectionStore((state) => state.collections);
+    const links = useLinkCollectionStore((state) => state.links);
     const [inputValue, setInputValue] = useState("");
+    const [error, setError] = useState<string>("");
     const [selectedCollection, setSelectedCollection] = useState(() => {
         if (activeCollectionId && activeCollectionId !== "recent") {
             return activeCollectionId;
@@ -64,10 +66,79 @@ function AddItemDialog({
         }
     }, [activeCollectionId]);
 
-    const handleAdd = () => {
-        if (inputValue.trim()) {
-            onSave(inputValue.trim(), selectedCollection);
+    const checkForDuplicateUrl = (url: string): boolean => {
+        try {
+            const inputUrl = new URL(url);
+
+            return links.some((storedLink) => {
+                try {
+                    const storedUrl = new URL(storedLink.url);
+                    return (
+                        storedUrl.hostname === inputUrl.hostname &&
+                        storedUrl.pathname === inputUrl.pathname
+                    );
+                } catch {
+                    return false;
+                }
+            });
+        } catch {
+            //try adding https:// and check again
+            try {
+                const withHttps = new URL(`https://${url}`);
+                return links.some((storedLink) => {
+                    try {
+                        const storedUrl = new URL(storedLink.url);
+                        return (
+                            storedUrl.hostname === withHttps.hostname &&
+                            storedUrl.pathname === withHttps.pathname
+                        );
+                    } catch {
+                        return false;
+                    }
+                });
+            } catch {
+                return false;
+            }
+        }
+    };
+
+    const checkForDuplicateCollection = (name: string): boolean => {
+        const normalizedName = name.toLowerCase().trim();
+        return collections.some(
+            (collection) => collection.name.toLowerCase() === normalizedName
+        );
+    };
+
+    const handleAdd = async () => {
+        const trimmedValue = inputValue.trim();
+        if (!trimmedValue) return;
+
+        if (isAddingLink) {
+            try {
+                // Check for duplicate URLs
+                if (checkForDuplicateUrl(trimmedValue)) {
+                    setError("This link has already been added");
+                    return;
+                }
+
+                await onSave(trimmedValue, selectedCollection);
+                setInputValue("");
+                setError("");
+                setIsDialogOpen(false);
+            } catch (error) {
+                setError("Please enter a valid website URL");
+                return;
+            }
+        } else {
+            // Check for duplicate collection names
+            if (checkForDuplicateCollection(trimmedValue)) {
+                setError("A collection with this name already exists");
+                return;
+            }
+
+            onSave(trimmedValue, selectedCollection);
             setInputValue("");
+            setError("");
             setIsDialogOpen(false);
         }
     };
@@ -105,10 +176,21 @@ function AddItemDialog({
                     <input
                         type="text"
                         placeholder={placeholder}
-                        className="input py-2 px-4 rounded-md"
+                        className={`w-full px-4 py-2 border rounded-md outline-none transition-colors
+                            ${
+                                error
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                    : "border-input focus:border-ring focus:ring-ring"
+                            }`}
                         value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
+                        onChange={(e) => {
+                            setInputValue(e.target.value);
+                            setError("");
+                        }}
                     />
+                    {error && (
+                        <span className="text-sm text-red-500">{error}</span>
+                    )}
                 </div>
                 {isAddingLink && collections.length > 1 && (
                     <Select
