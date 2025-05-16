@@ -109,8 +109,8 @@ export function AppSidebar({
                     </SidebarGroupContent>
                 </SidebarGroup>
                 <AddItemDialog
-                    placeholder="Enter collection name..."
-                    onSave={handleAddCollection}
+                    placeholder="Enter collection name"
+                    onCreateCollection={handleAddCollection}
                     dialogTitle="Add New Collection"
                     trigger={
                         <Button variant="secondary" className="m-4">

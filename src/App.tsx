@@ -81,12 +81,18 @@ function App() {
                 collectionId || activeCollectionId
             );
 
-            return true;
+            // No return value to match expected signature
         } catch (error) {
             console.error("Error fetching link preview:", error);
             throw error;
         }
     }
+
+    const handleAddCollection = (collectionName: string) => {
+        const createCollection =
+            useLinkCollectionStore.getState().createCollection;
+        createCollection(collectionName);
+    };
 
     return (
         <SidebarProvider>
@@ -141,8 +147,9 @@ function App() {
             </SidebarInset>
             <AddItemDialog
                 triggerClassName="fixed bottom-4 right-4"
-                placeholder="Enter link URL..."
-                onSave={handleAddLink}
+                placeholder="Enter link URL"
+                onCreateCollection={handleAddCollection}
+                onAddLink={handleAddLink}
                 dialogTitle="Add New Link"
                 dialogDescription="Enter the URL of the link you want to add."
                 isAddingLink={true}

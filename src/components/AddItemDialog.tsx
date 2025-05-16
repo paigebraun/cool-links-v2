@@ -27,7 +27,8 @@ interface AddItemDialogProps {
     triggerIcon?: React.ReactNode;
     trigger?: React.ReactNode;
     placeholder: string;
-    onSave: (value: string, collectionId?: string) => void;
+    onCreateCollection?: (name: string) => Promise<void> | void;
+    onAddLink?: (url: string, collectionId: string) => Promise<void> | void;
     dialogTitle?: string;
     dialogDescription?: string;
     isAddingLink?: boolean;
@@ -39,7 +40,8 @@ function AddItemDialog({
     triggerIcon = <Plus className="size-8" />,
     trigger,
     placeholder,
-    onSave,
+    onCreateCollection,
+    onAddLink,
     dialogTitle = "",
     dialogDescription = "",
     isAddingLink = false,
@@ -59,6 +61,36 @@ function AddItemDialog({
         return firstNonRecentCollection?.id || collections[0]?.id;
     });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [showCreateCollection, setShowCreateCollection] = useState(false);
+    const [realCollections, setRealCollections] = useState(
+        collections.filter((c) => c.id !== "recent")
+    );
+
+    useEffect(() => {
+        setRealCollections(collections.filter((c) => c.id !== "recent"));
+    }, [collections]);
+
+    // When dialog opens, check if we need to show collection creation first
+    useEffect(() => {
+        if (isDialogOpen && isAddingLink && realCollections.length === 0) {
+            setShowCreateCollection(true);
+            setInputValue("");
+            setError("");
+        } else if (isDialogOpen && !isAddingLink) {
+            setShowCreateCollection(false);
+        }
+    }, [isDialogOpen, isAddingLink, realCollections.length]);
+
+    // After creating a collection, set it as selected
+    useEffect(() => {
+        if (
+            !showCreateCollection &&
+            isAddingLink &&
+            realCollections.length === 1
+        ) {
+            setSelectedCollection(realCollections[0].id);
+        }
+    }, [showCreateCollection, isAddingLink, realCollections.length]);
 
     useEffect(() => {
         if (activeCollectionId && activeCollectionId !== "recent") {
@@ -111,17 +143,34 @@ function AddItemDialog({
 
     const handleAdd = async () => {
         const trimmedValue = inputValue.trim();
-        if (!trimmedValue) return;
+
+        if (showCreateCollection) {
+            if (!trimmedValue) {
+                setError("Please enter a collection name");
+                return;
+            }
+            if (checkForDuplicateCollection(trimmedValue)) {
+                setError("A collection with this name already exists");
+                return;
+            }
+            await onCreateCollection(trimmedValue);
+            setInputValue("");
+            setError("");
+            setShowCreateCollection(false);
+            return;
+        }
 
         if (isAddingLink) {
+            if (!trimmedValue) {
+                setError("Please enter a link");
+                return;
+            }
             try {
-                // Check for duplicate URLs
                 if (checkForDuplicateUrl(trimmedValue)) {
                     setError("This link has already been added");
                     return;
                 }
-
-                await onSave(trimmedValue, selectedCollection);
+                await onAddLink(trimmedValue, selectedCollection!);
                 setInputValue("");
                 setError("");
                 setIsDialogOpen(false);
@@ -130,18 +179,33 @@ function AddItemDialog({
                 return;
             }
         } else {
-            // Check for duplicate collection names
+            if (!trimmedValue) {
+                setError("Please enter a collection name");
+                return;
+            }
             if (checkForDuplicateCollection(trimmedValue)) {
                 setError("A collection with this name already exists");
                 return;
             }
-
-            onSave(trimmedValue, selectedCollection);
+            await onCreateCollection(trimmedValue);
             setInputValue("");
             setError("");
             setIsDialogOpen(false);
         }
     };
+
+    // Dynamically set dialog content based on state
+    const currentDialogTitle = showCreateCollection
+        ? "Add New collection"
+        : dialogTitle;
+
+    const currentDialogDescription = showCreateCollection
+        ? "Please create a collection before adding links."
+        : dialogDescription;
+
+    const currentPlaceholder = showCreateCollection
+        ? "Enter collection name"
+        : placeholder;
 
     const handleCollectionChange = (value: string) => {
         const collection = collections.find((c) => c.name === value);
@@ -165,17 +229,19 @@ function AddItemDialog({
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    {dialogTitle && <DialogTitle>{dialogTitle}</DialogTitle>}
-                    {dialogDescription && (
+                    {currentDialogTitle && (
+                        <DialogTitle>{currentDialogTitle}</DialogTitle>
+                    )}
+                    {currentDialogDescription && (
                         <DialogDescription>
-                            {dialogDescription}
+                            {currentDialogDescription}
                         </DialogDescription>
                     )}
                 </DialogHeader>
                 <div className="flex flex-col gap-2">
                     <input
                         type="text"
-                        placeholder={placeholder}
+                        placeholder={currentPlaceholder}
                         className={`w-full px-4 py-2 border rounded-md outline-none transition-colors
                             ${
                                 error
@@ -192,22 +258,19 @@ function AddItemDialog({
                         <span className="text-sm text-red-500">{error}</span>
                     )}
                 </div>
-                {isAddingLink && collections.length > 1 && (
-                    <Select
-                        value={activeCollectionName}
-                        onValueChange={handleCollectionChange}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a collection" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Collection</SelectLabel>
-                                {collections
-                                    .filter(
-                                        (collection) =>
-                                            collection.id !== "recent"
-                                    )
-                                    .map((collection) => (
+                {isAddingLink &&
+                    !showCreateCollection &&
+                    realCollections.length > 0 && (
+                        <Select
+                            value={activeCollectionName}
+                            onValueChange={handleCollectionChange}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a collection" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Collection</SelectLabel>
+                                    {realCollections.map((collection) => (
                                         <SelectItem
                                             value={collection.name}
                                             key={collection.id}>
@@ -216,10 +279,10 @@ function AddItemDialog({
                                             )}
                                         </SelectItem>
                                     ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                )}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    )}
                 <Button onClick={handleAdd}>Add</Button>
                 <DialogClose asChild>
                     <Button type="button" variant="secondary">

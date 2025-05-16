@@ -78,21 +78,14 @@ const useLinkCollectionStore = create<LinkCollectionStore>()(
                 });
             },
             deleteCollection: (collectionId) => {
-                set((state) => {
-                    if (collectionId === "recent") return state; // "recent" is the default, non-deletable collection
-                    const updatedCollections = state.collections.filter(
-                        (collection) => collection.id !== collectionId
-                    );
-                    const updatedLinks = state.links.map((link) =>
-                        link.collectionId === collectionId
-                            ? { ...link, collectionId: "recent" }
-                            : link
-                    );
-                    return {
-                        collections: updatedCollections,
-                        links: updatedLinks,
-                    };
-                });
+                set((state) => ({
+                    collections: state.collections.filter(
+                        (c) => c.id !== collectionId
+                    ),
+                    links: state.links.filter(
+                        (link) => link.collectionId !== collectionId
+                    ),
+                }));
             },
             renameCollection: (collectionId, newName) => {
                 set((state) => {
